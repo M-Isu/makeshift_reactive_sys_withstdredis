@@ -2,20 +2,26 @@ package com.example;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.RedisClient;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 
 public class App {
 
+    static{
+
+    }
+
     //take input from the user.
+
+    static List<String> taskIds = new ArrayList<>();
 
     public static void main(String[] args){
 
         App inputobject = new App();
 
         RedisService redisObject = new RedisService();
+
+        ThreadStartClass threadstartvalue = new ThreadStartClass();
+
 
         while(true){
 
@@ -27,9 +33,13 @@ public class App {
             }
             else{
                 //take value to redis.
-                redisObject.storeToRedis(UUID.randomUUID().toString(), finaluserobject);
+                String id = UUID.randomUUID().toString();
+                redisObject.storeToRedis(id, finaluserobject);
+                taskIds.add(id);
             }
-
+            for(String xx : taskIds){
+                threadstartvalue.threadstartfunction(xx);
+            }
         }
     }
 
@@ -66,8 +76,6 @@ public class App {
         else{
             return false;
         }
-
-
 
 
     }
