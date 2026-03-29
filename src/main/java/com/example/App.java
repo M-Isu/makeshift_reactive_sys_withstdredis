@@ -5,49 +5,75 @@ import redis.clients.jedis.RedisClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
-public class App{
+public class App {
 
-    RedisClient jedis = new RedisClient.Builder()
-            .fromURI("redis:://someurl goes here")
-            .build();
+    //take input from the user.
 
-public static void main(String[] args) throws Exception{
+    public static void main(String[] args){
 
-    while(true){
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Type in i/o operation:  Format (operation_content),(operation_destination),(operation): " );
-        String input = scan.nextLine();
-        List<String> list_instructions = Arrays.asList(input.split(","));
+        App inputobject = new App();
 
-        String first = list_instructions.get(0);
-        String second = list_instructions.get(1);
-        String third = list_instructions.get(2);
+        RedisService redisObject = new RedisService();
 
-        //check for null values in user inputted values.
+        while(true){
+
+            //System.out.println("user typed" + inputobject.userInput());
+            String finaluserobject = inputobject.userInput();
+            if(!inputobject.validateUserInput(finaluserobject))
+            {
+                System.out.println("WRONG INPUT FORMAT: --> EXPECTED : [ACTION FILEPATH CONTENT]");
+            }
+            else{
+                //take value to redis.
+                redisObject.storeToRedis(UUID.randomUUID().toString(), finaluserobject);
+            }
+
+        }
+    }
+
+    //take user input and return
+    public String userInput(){
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
+    }
+
+    public Boolean validateUserInput(String input){
+
+        //validate input from input stream.
+        int mistake_counter = 0;
+        String allowedKeywords  = "write read";
+
+        //[action, filepath , content]
+        //for read the content parameter will  be ignored.
+        //eg [read, c://myfile.txt]
+        //eg [write, c://anotherfile.txt]
+
+        List<String> stringlist = Arrays.asList(input.split(" "));
+        if(stringlist.size() > 3){
+            mistake_counter++;
+        }
+
+        if(!allowedKeywords.contains(stringlist.get(0))){
+            mistake_counter++;
+        }
+
+
+        if(mistake_counter == 0){
+            return true;
+        }
+        else{
+            return false;
+        }
 
 
 
-        App myapp = new App();
-        myapp.inputTake(first, second, third);
 
     }
+
 }
 
-public void inputTake(String x, String file, String operation) throws Exception{
-    //this would support file read and maybe network calls --> basically these are going to be the i/o task
-    if(operation.equals("network")){
-        System.out.println("network calls not available yet");
-    }
-    else if(operation.equals("file")){
-        String result = jedis.set("COMMANDIDX123", x + "," + file + "," + operation);
-        System.out.println(result);
-    }
-	else{
-        throw new Exception("operation not found within system");
-    }
-}
-}
 
 
 
